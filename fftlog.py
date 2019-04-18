@@ -71,6 +71,36 @@ class fftlog(object):
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
 
+	def fftlog_dj(self):
+		"""
+		Calculate F(y) = \int_0^\infty dx / x * f(x) * j'_\ell(xy),
+		where j_\ell is the spherical Bessel func of order ell.
+		array y is set as y[:] = (ell+0.5)/x[::-1]
+		"""
+		x0 = self.x[0]
+		z_ar = self.nu + 1j*self.eta_m
+		y = (self.ell+1.) / self.x[::-1]
+		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_1(self.ell, z_ar)
+
+		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
+		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
+
+	def fftlog_ddj(self):
+		"""
+		Calculate F(y) = \int_0^\infty dx / x * f(x) * j''_\ell(xy),
+		where j_\ell is the spherical Bessel func of order ell.
+		array y is set as y[:] = (ell+0.5)/x[::-1]
+		"""
+		x0 = self.x[0]
+		z_ar = self.nu + 1j*self.eta_m
+		y = (self.ell+1.) / self.x[::-1]
+		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_2(self.ell, z_ar)
+
+		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
+		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
+
+
+
 class hankel(object):
 	def __init__(self, x, fx, n, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25):
 		print('nu is required to be between (0.5-n) and 2.')
@@ -80,6 +110,7 @@ class hankel(object):
 		y, Fy = self.myfftlog.fftlog()
 		Fy *= np.sqrt(2*y/np.pi)
 		return y, Fy
+
 
 
 ### Utility functions ####################
@@ -115,6 +146,9 @@ def c_window(n,n_cut):
 def g_m_vals(mu,q):
 	'''
 	g_m_vals function is adapted from FAST-PT
+	g_m_vals(mu,q) = gamma( (mu+1+q)/2 ) / gamma( (mu+1-q)/2 ) = gamma(alpha+)/gamma(alpha-)
+	mu = (alpha+) + (alpha-) - 1
+	q = (alpha+) - (alpha-)
 	'''
 	imag_q= np.imag(q)
 	g_m=np.zeros(q.size, dtype=complex)
@@ -139,10 +173,34 @@ def g_m_vals(mu,q):
 
 def g_l(l,z_array):
 	'''
-	gl = 2.**z_array * gamma((l+z_array)/2.) / gamma((3.+l-z_array)/2.)
+	gl = 2^z_array * gamma((l+z_array)/2.) / gamma((3.+l-z_array)/2.)
+	alpha+ = (l+z_array)/2.
+	alpha- = (3.+l-z_array)/2.
+	mu = (alpha+) + (alpha-) - 1 = l+0.5
+	q = (alpha+) - (alpha-) = z_array - 1.5
 	'''
 	gl = 2.**z_array * g_m_vals(l+0.5,z_array-1.5)
 	return gl
+
+def g_l_1(l,z_array):
+	'''
+	for integral containing one first-derivative of spherical Bessel function
+	gl1 = -2^(z_array-1) *(z_array -1)* gamma((l+z_array-1)/2.) / gamma((4.+l-z_array)/2.)
+	mu = l+0.5
+	q = z_array - 2.5
+	'''
+	gl1 = -2.**(z_array-1) *(z_array -1) * g_m_vals(l+0.5,z_array-2.5)
+	return gl1
+
+def g_l_2(l,z_array):
+	'''
+	for integral containing one 2nd-derivative of spherical Bessel function
+	gl2 = 2^(z_array-2) *(z_array -1)*(z_array -2)* gamma((l+z_array-2)/2.) / gamma((5.+l-z_array)/2.)
+	mu = l+0.5
+	q = z_array - 3.5
+	'''
+	gl2 = -2.**(z_array-1) *(z_array -1)*(z_array -2)* g_m_vals(l+0.5,z_array-3.5)
+	return gl2
 
 if __name__ == '__main__':
 	import matplotlib.pyplot as plt
