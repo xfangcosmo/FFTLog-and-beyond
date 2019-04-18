@@ -68,7 +68,7 @@ class fftlog(object):
 		y = (self.ell+1.) / self.x[::-1]
 		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l(self.ell, z_ar)
 
-		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4./self.N
+		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
 
 class hankel(object):
@@ -149,9 +149,7 @@ if __name__ == '__main__':
 
 	print('This is a test of fftlog module written by Xiao Fang.')
 	print('nu is required to be between -ell to 2.')
-	pktest = np.loadtxt('Pk_test')
-	k = pktest[:,0]
-	pk= pktest[:,1]
+	k, pk = np.loadtxt('Pk_test', usecols=(0,1), unpack=True)
 	N = k.size
 	print('number of input data points: '+str(N))
 	ell = 1
@@ -177,6 +175,10 @@ if __name__ == '__main__':
 	subfig2.set_xlabel('y')
 	subfig2.set_ylabel('F(y)')
 	subfig2.plot(r, Fr)
+
+	r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
+	subfig2.plot(r_bf, Fr_bf)
+
 	plt.tight_layout()
 	plt.show()
 
