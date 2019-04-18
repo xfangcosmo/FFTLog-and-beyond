@@ -15,7 +15,7 @@ from numpy.fft import rfft, irfft
 
 class fftlog(object):
 
-	def __init__(self, x, fx, ell, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25):
+	def __init__(self, x, fx, ell, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
 
 		self.x_origin = x # x is logarithmically spaced
 		# self.lnx = np.log(x)
@@ -31,6 +31,16 @@ class fftlog(object):
 		self.x = log_extrap(x, N_extrap_low, N_extrap_high)
 		self.fx = log_extrap(fx, N_extrap_low, N_extrap_high)
 		self.N = self.x.size
+
+		# zero-padding
+		self.N_pad = N_pad
+		if(N_pad):
+			pad = np.zeros(N_pad)
+			self.x = log_extrap(self.x, N_pad, N_pad)
+			self.fx = np.hstack((pad, self.fx, pad))
+			self.N += 2*N_pad
+			self.N_extrap_high += N_pad
+			self.N_extrap_low += N_pad
 
 		if(self.N%2==1): # Make sure the array sizes are even
 			self.x= self.x[:-1]
@@ -61,7 +71,7 @@ class fftlog(object):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j_\ell(xy),
 		where j_\ell is the spherical Bessel func of order ell.
-		array y is set as y[:] = (ell+0.5)/x[::-1]
+		array y is set as y[:] = (ell+1)/x[::-1]
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
@@ -75,11 +85,11 @@ class fftlog(object):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j'_\ell(xy),
 		where j_\ell is the spherical Bessel func of order ell.
-		array y is set as y[:] = (ell+0.5)/x[::-1]
+		array y is set as y[:] = (ell+2)/x[::-1]
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
-		y = (self.ell+1.) / self.x[::-1]
+		y = (self.ell+2.) / self.x[::-1]
 		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_1(self.ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
@@ -89,11 +99,11 @@ class fftlog(object):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j''_\ell(xy),
 		where j_\ell is the spherical Bessel func of order ell.
-		array y is set as y[:] = (ell+0.5)/x[::-1]
+		array y is set as y[:] = (ell+3)/x[::-1]
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
-		y = (self.ell+1.) / self.x[::-1]
+		y = (self.ell+3.) / self.x[::-1]
 		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_2(self.ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
@@ -102,9 +112,9 @@ class fftlog(object):
 
 
 class hankel(object):
-	def __init__(self, x, fx, n, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25):
+	def __init__(self, x, fx, n, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
 		print('nu is required to be between (0.5-n) and 2.')
-		self.myfftlog = fftlog(x, np.sqrt(x)*fx, n-0.5, nu, N_extrap_low, N_extrap_high, c_window_width)
+		self.myfftlog = fftlog(x, np.sqrt(x)*fx, n-0.5, nu, N_extrap_low, N_extrap_high, c_window_width, N_pad)
 	
 	def hankel(self):
 		y, Fy = self.myfftlog.fftlog()
@@ -211,10 +221,12 @@ if __name__ == '__main__':
 	N = k.size
 	print('number of input data points: '+str(N))
 	ell = 1
-	nu = 1.
-	myfftlog = fftlog(k, pk, ell=ell, nu=nu, N_extrap_low=1500, N_extrap_high=1500, c_window_width=0.25)
+	nu = 1.5
+	myfftlog = fftlog(k, pk, ell=ell, nu=nu, N_extrap_low=1500, N_extrap_high=1500, c_window_width=0.25, N_pad=1000)
 	r, Fr = myfftlog.fftlog()
 
+	################# Test fftlog ##############
+	print('Testing fftlog')
 	fig = plt.figure(figsize=(8,4))
 	fig.suptitle(r'$F(y) = \int_0^\infty f(x)j_{\ell}(xy) dx/x, \ell=$%.1f'%(ell))
 
@@ -240,7 +252,38 @@ if __name__ == '__main__':
 	plt.tight_layout()
 	plt.show()
 
-	#################
+	################# Test j' ##############
+	print('Testing 1st & 2nd-derivative')
+
+	r1, Fr1 = myfftlog.fftlog_dj()
+	r2, Fr2 = myfftlog.fftlog_ddj()
+	fig = plt.figure(figsize=(8,4))
+	fig.suptitle(r'$F(y) = \int_0^\infty f(x)j_{\ell}\'(xy) dx/x, \ell=$%.1f'%(ell))
+
+	subfig1 = fig.add_subplot(1,2,1)
+	subfig1.set_xscale('log')
+	subfig1.set_yscale('log')
+	subfig1.set_xlabel('x')
+	subfig1.set_ylabel('f(x)')
+	subfig1.plot(k, pk)
+	plt.tight_layout()
+
+	subfig2 = fig.add_subplot(1,2,2)
+	subfig2.set_title(r'$\nu=$%.2f'%(nu))
+	subfig2.set_xscale('log')
+	subfig2.set_yscale('log')
+	subfig2.set_xlabel('y')
+	subfig2.set_ylabel('F(y)')
+	# subfig2.plot(r1, abs(Fr1))
+	subfig2.plot(r2, Fr2, '--')
+	# r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
+	# subfig2.plot(r_bf, Fr_bf)
+
+	plt.tight_layout()
+	plt.show()
+
+	################# Test Hankel ##############
+	print('Testing hankel')
 
 	n = 0
 	nu = 1.
