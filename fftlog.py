@@ -65,11 +65,21 @@ class fftlog(object):
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
-		y = (self.ell+0.5) / self.x[::-1]
+		y = (self.ell+1.) / self.x[::-1]
 		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l(self.ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4./self.N
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
+
+class hankel(object):
+	def __init__(self, x, fx, n, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25):
+		print('nu is required to be between (0.5-n) and 2.')
+		self.myfftlog = fftlog(x, np.sqrt(x)*fx, n-0.5, nu, N_extrap_low, N_extrap_high, c_window_width)
+	
+	def hankel(self):
+		y, Fy = self.myfftlog.fftlog()
+		Fy *= np.sqrt(2*y/np.pi)
+		return y, Fy
 
 
 ### Utility functions ####################
@@ -138,6 +148,7 @@ if __name__ == '__main__':
 	import matplotlib.pyplot as plt
 
 	print('This is a test of fftlog module written by Xiao Fang.')
+	print('nu is required to be between -ell to 2.')
 	pktest = np.loadtxt('Pk_test')
 	k = pktest[:,0]
 	pk= pktest[:,1]
@@ -150,6 +161,34 @@ if __name__ == '__main__':
 
 	fig = plt.figure(figsize=(8,4))
 	fig.suptitle(r'$F(y) = \int_0^\infty f(x)j_{\ell}(xy) dx/x, \ell=$%.1f'%(ell))
+
+	subfig1 = fig.add_subplot(1,2,1)
+	subfig1.set_xscale('log')
+	subfig1.set_yscale('log')
+	subfig1.set_xlabel('x')
+	subfig1.set_ylabel('f(x)')
+	subfig1.plot(k, pk)
+	plt.tight_layout()
+
+	subfig2 = fig.add_subplot(1,2,2)
+	subfig2.set_title(r'$\nu=$%.2f'%(nu))
+	subfig2.set_xscale('log')
+	subfig2.set_yscale('log')
+	subfig2.set_xlabel('y')
+	subfig2.set_ylabel('F(y)')
+	subfig2.plot(r, Fr)
+	plt.tight_layout()
+	plt.show()
+
+	#################
+
+	n = 0
+	nu = 1.
+	myhankel = hankel(k, pk, n=n, nu=nu, N_extrap_low=1500, N_extrap_high=1500, c_window_width=0.25)
+	r, Fr = myhankel.hankel()
+
+	fig = plt.figure(figsize=(8,4))
+	fig.suptitle(r'$F(y) = \int_0^\infty f(x)J_{n}(xy) dx/x, n=$%.1f'%(n))
 
 	subfig1 = fig.add_subplot(1,2,1)
 	subfig1.set_xscale('log')
