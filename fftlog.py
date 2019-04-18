@@ -46,7 +46,8 @@ class fftlog(object):
 			self.x= self.x[:-1]
 			self.fx=self.fx[:-1]
 			self.N -= 1
-			self.N_extrap_high -=1
+			if(N_pad):
+				self.N_extrap_high -=1
 
 		self.m, self.c_m = self.get_c_m()
 		self.eta_m = 2*np.pi/(float(self.N)*self.dlnx) * self.m
@@ -79,6 +80,7 @@ class fftlog(object):
 		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l(self.ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
+		print(self.N_extrap_high,self.N,self.N_extrap_low)
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
 
 	def fftlog_dj(self):
