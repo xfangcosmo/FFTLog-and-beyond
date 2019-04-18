@@ -46,8 +46,8 @@ subfig2.set_xlabel('y')
 subfig2.set_ylabel('F(y)')
 subfig2.plot(r, Fr)
 
-r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
-subfig2.plot(r_bf, Fr_bf)
+# r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
+# subfig2.plot(r_bf, Fr_bf)
 
 plt.tight_layout()
 plt.show()
