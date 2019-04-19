@@ -46,6 +46,9 @@ subfig2.set_xlabel('y')
 subfig2.set_ylabel('F(y)')
 subfig2.plot(r, Fr)
 
+r_c, Fr_c = np.loadtxt('cfftlog/test_output.txt', usecols=(0,1), unpack=True)
+subfig2.plot(r_c, Fr_c)
+
 # r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
 # subfig2.plot(r_bf, Fr_bf)
 
