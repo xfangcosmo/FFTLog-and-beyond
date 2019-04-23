@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 
 print('This is a test of fftlog module written by Xiao Fang.')
 print('nu is required to be between -ell to 2.')
-k, pk = np.loadtxt('Pk_test', usecols=(0,1), unpack=True)
+k, pk = np.loadtxt('../Pk_test', usecols=(0,1), unpack=True)
 N = k.size
 print('number of input data points: '+str(N))
 ell = 1
@@ -46,7 +46,7 @@ subfig2.set_xlabel('y')
 subfig2.set_ylabel('F(y)')
 subfig2.plot(r, Fr, label='fftlog')
 
-r_c, Fr_c = np.loadtxt('cfftlog/test_output.txt', usecols=(0,1), unpack=True)
+r_c, Fr_c = np.loadtxt('../cfftlog/test_output.txt', usecols=(0,1), unpack=True)
 subfig2.plot(r_c, Fr_c, label='bad brutal')
 
 # r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
