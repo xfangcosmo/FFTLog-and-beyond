@@ -15,13 +15,12 @@ from numpy.fft import rfft, irfft
 
 class fftlog(object):
 
-	def __init__(self, x, fx, ell, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
+	def __init__(self, x, fx, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
 
 		self.x_origin = x # x is logarithmically spaced
 		# self.lnx = np.log(x)
 		self.dlnx = np.log(x[1]/x[0])
 		self.fx_origin= fx # f(x) array
-		self.ell = ell
 		self.nu = nu
 		self.N_extrap_low = N_extrap_low
 		self.N_extrap_high = N_extrap_high
@@ -68,7 +67,7 @@ class fftlog(object):
 		c_m = c_m*c_window(m, int(self.c_window_width*self.N//2.) )
 		return m, c_m
 
-	def fftlog(self):
+	def fftlog(self, ell):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j_\ell(xy),
 		where j_\ell is the spherical Bessel func of order ell.
@@ -76,14 +75,14 @@ class fftlog(object):
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
-		y = (self.ell+1.) / self.x[::-1]
-		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l(self.ell, z_ar)
+		y = (ell+1.) / self.x[::-1]
+		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l(ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
 		print(self.N_extrap_high,self.N,self.N_extrap_low)
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
 
-	def fftlog_dj(self):
+	def fftlog_dj(self, ell):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j'_\ell(xy),
 		where j_\ell is the spherical Bessel func of order ell.
@@ -91,13 +90,13 @@ class fftlog(object):
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
-		y = (self.ell+2.) / self.x[::-1]
-		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_1(self.ell, z_ar)
+		y = (ell+2.) / self.x[::-1]
+		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_1(ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
 
-	def fftlog_ddj(self):
+	def fftlog_ddj(self, ell):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j''_\ell(xy),
 		where j_\ell is the spherical Bessel func of order ell.
@@ -105,8 +104,8 @@ class fftlog(object):
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
-		y = (self.ell+3.) / self.x[::-1]
-		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_2(self.ell, z_ar)
+		y = (ell+3.) / self.x[::-1]
+		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_2(ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
@@ -114,12 +113,12 @@ class fftlog(object):
 
 
 class hankel(object):
-	def __init__(self, x, fx, n, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
+	def __init__(self, x, fx, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
 		print('nu is required to be between (0.5-n) and 2.')
-		self.myfftlog = fftlog(x, np.sqrt(x)*fx, n-0.5, nu, N_extrap_low, N_extrap_high, c_window_width, N_pad)
+		self.myfftlog = fftlog(x, np.sqrt(x)*fx, nu, N_extrap_low, N_extrap_high, c_window_width, N_pad)
 	
-	def hankel(self):
-		y, Fy = self.myfftlog.fftlog()
+	def hankel(self, n):
+		y, Fy = self.myfftlog.fftlog(n-0.5)
 		Fy *= np.sqrt(2*y/np.pi)
 		return y, Fy
 
@@ -161,23 +160,25 @@ def g_m_vals(mu,q):
 	g_m_vals(mu,q) = gamma( (mu+1+q)/2 ) / gamma( (mu+1-q)/2 ) = gamma(alpha+)/gamma(alpha-)
 	mu = (alpha+) + (alpha-) - 1
 	q = (alpha+) - (alpha-)
+
+	switching to asymptotic form when |Im(q)| + |mu| > cut = 200
 	'''
 	imag_q= np.imag(q)
 	g_m=np.zeros(q.size, dtype=complex)
 	cut =200
-	asym_q=q[np.absolute(imag_q) >cut]
+	asym_q=q[np.absolute(imag_q)+ np.absolute(mu) >cut]
 	asym_plus=(mu+1+asym_q)/2.
 	asym_minus=(mu+1-asym_q)/2.
 
-	q_good=q[ (np.absolute(imag_q) <=cut) & (q!=mu + 1 + 0.0j)]
+	q_good=q[ (np.absolute(imag_q)+ np.absolute(mu) <=cut) & (q!=mu + 1 + 0.0j)]
 
 	alpha_plus=(mu+1+q_good)/2.
 	alpha_minus=(mu+1-q_good)/2.
 	
-	g_m[(np.absolute(imag_q) <=cut) & (q!= mu + 1 + 0.0j)] =gamma(alpha_plus)/gamma(alpha_minus)
+	g_m[(np.absolute(imag_q)+ np.absolute(mu) <=cut) & (q!= mu + 1 + 0.0j)] =gamma(alpha_plus)/gamma(alpha_minus)
 
 	# asymptotic form 								
-	g_m[np.absolute(imag_q)>cut] = np.exp( (asym_plus-0.5)*np.log(asym_plus) - (asym_minus-0.5)*np.log(asym_minus) - asym_q \
+	g_m[np.absolute(imag_q)+ np.absolute(mu)>cut] = np.exp( (asym_plus-0.5)*np.log(asym_plus) - (asym_minus-0.5)*np.log(asym_minus) - asym_q \
 		+1./12 *(1./asym_plus - 1./asym_minus) +1./360.*(1./asym_minus**3 - 1./asym_plus**3) +1./1260*(1./asym_plus**5 - 1./asym_minus**5) )
 
 	g_m[np.where(q==mu+1+0.0j)[0]] = 0.+0.0j
