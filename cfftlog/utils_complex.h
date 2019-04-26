@@ -10,3 +10,4 @@ void c_window(double complex *out, double c_window_width, long halfN);
 // void resample_fourier_gauss(double *k, double *fk, config *config);
 
 double complex gamma_lanczos(double complex z);
+double complex lngamma_lanczos(double complex z);

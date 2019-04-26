@@ -212,6 +212,6 @@ def g_l_2(l,z_array):
 	mu = l+0.5
 	q = z_array - 3.5
 	'''
-	gl2 = -2.**(z_array-1) *(z_array -1)*(z_array -2)* g_m_vals(l+0.5,z_array-3.5)
+	gl2 = 2.**(z_array-2) *(z_array -1)*(z_array -2)* g_m_vals(l+0.5,z_array-3.5)
 	return gl2
 
