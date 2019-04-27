@@ -90,7 +90,7 @@ class fftlog(object):
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
-		y = (ell+2.) / self.x[::-1]
+		y = (ell+1.) / self.x[::-1]
 		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_1(ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
@@ -104,7 +104,7 @@ class fftlog(object):
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
-		y = (ell+3.) / self.x[::-1]
+		y = (ell+1.) / self.x[::-1]
 		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * g_l_2(ell, z_ar)
 
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
