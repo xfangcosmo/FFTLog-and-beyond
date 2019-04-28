@@ -14,6 +14,10 @@
 
 void cfftlog(double *x, double *fx, long N, config *config, int ell, double *y, double *Fy) {
 
+	long N_original = N;
+	long N_pad = config->N_pad;
+	N += 2*N_pad;
+
 	if(N % 2) {printf("Please use even number of x !\n"); exit(0);}
 	long halfN = N/2;
 
@@ -39,14 +43,18 @@ void cfftlog(double *x, double *fx, long N, config *config, int ell, double *y, 
 	// printf("g2[0]: %.15e+I*(%.15e)\n", creal(g2[0]),cimag(g2[0]));
 
 	// calculate y arrays
-	for(i=0; i<N; i++) {y[i] = (ell+1.) / x[N-1-i];}
+	for(i=0; i<N_original; i++) {y[i] = (ell+1.) / x[N_original-1-i];}
 	y0 = y[0];
 
 	// biased input func
 	double *fb;
 	fb = malloc(N* sizeof(double));
-	for(i=0; i<N; i++) {
-		fb[i] = fx[i] / pow(x[i], config->nu) ;
+	for(i=0; i<N_pad; i++) {
+		fb[i] = 0.;
+		fb[N-1-i] = 0.;
+	}
+	for(i=N_pad; i<N_pad+N_original; i++) {
+		fb[i] = fx[i-N_pad] / pow(x[i-N_pad], config->nu) ;
 	}
 
 	fftw_complex *out;
@@ -60,7 +68,7 @@ void cfftlog(double *x, double *fx, long N, config *config, int ell, double *y, 
 	// printf("out[1]:%.15e+i*(%.15e)\n", creal(out[1]), cimag(out[1]));
 
 	for(i=0; i<=halfN; i++) {
-		out[i] *= cpow(x0*y0, -I*eta_m[i]) * gl[i] ;
+		out[i] *= cpow(x0*y0/exp(2*N_pad*dlnx), -I*eta_m[i]) * gl[i] ;
 		out[i] = conj(out[i]);
 	}
 
@@ -71,8 +79,8 @@ void cfftlog(double *x, double *fx, long N, config *config, int ell, double *y, 
 
 	fftw_execute(plan_backward);
 
-	for(i=0; i<N; i++) {
-		Fy[i] = out_ifft[i] * sqrt(M_PI) / (4.*N * pow(y[i], config->nu));
+	for(i=0; i<N_original; i++) {
+		Fy[i] = out_ifft[i-N_pad] * sqrt(M_PI) / (4.*N * pow(y[i], config->nu));
 	}
 
 	fftw_destroy_plan(plan_forward);
@@ -82,6 +90,10 @@ void cfftlog(double *x, double *fx, long N, config *config, int ell, double *y, 
 }
 
 void cfftlog_ells(double *x, double *fx, long N, config *config, int* ell, long Nell, double **y, double **Fy) {
+
+	long N_original = N;
+	long N_pad = config->N_pad;
+	N += 2*N_pad;
 
 	if(N % 2) {printf("Please use even number of x !\n"); exit(0);}
 	long halfN = N/2;
@@ -102,8 +114,12 @@ void cfftlog_ells(double *x, double *fx, long N, config *config, int* ell, long 
 	// biased input func
 	double *fb;
 	fb = malloc(N* sizeof(double));
-	for(i=0; i<N; i++) {
-		fb[i] = fx[i] / pow(x[i], config->nu) ;
+	for(i=0; i<N_pad; i++) {
+		fb[i] = 0.;
+		fb[N-1-i] = 0.;
+	}
+	for(i=N_pad; i<N_pad+N_original; i++) {
+		fb[i] = fx[i-N_pad] / pow(x[i-N_pad], config->nu) ;
 	}
 
 	fftw_complex *out, *out_vary;
@@ -129,17 +145,18 @@ void cfftlog_ells(double *x, double *fx, long N, config *config, int* ell, long 
 		}
 
 		// calculate y arrays
-		for(i=0; i<N; i++) {y[j][i] = (ell[j]+1.) / x[N-1-i];}
+		for(i=0; i<N_original; i++) {y[j][i] = (ell[j]+1.) / x[N_original-1-i];}
 		y0 = y[j][0];
 
 		for(i=0; i<=halfN; i++) {
-			out_vary[i] = conj(out[i] * cpow(x0*y0, -I*eta_m[i]) * gl[i]) ;
+			out_vary[i] = conj(out[i] * cpow(x0*y0/exp(2*N_pad*dlnx), -I*eta_m[i]) * gl[i]) ;
+			// printf("gl:%e\n", gl[i]);
 		}
 
 		fftw_execute(plan_backward);
 
-		for(i=0; i<N; i++) {
-			Fy[j][i] = out_ifft[i] * sqrt(M_PI) / (4.*N * pow(y[j][i], config->nu));
+		for(i=0; i<N_original; i++) {
+			Fy[j][i] = out_ifft[i+N_pad] * sqrt(M_PI) / (4.*N * pow(y[j][i], config->nu));
 		}
 	}
 	fftw_destroy_plan(plan_forward);
