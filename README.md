@@ -10,4 +10,4 @@ An extended FFTLog code for efficiently computing integrals containing:
 
 The code is *independently* written and tested in python (./python/fftlog.py) and C (./cfftlog/).
 
-See more details in Note.pdf
+See more details in Note.pdf (still in progress)
