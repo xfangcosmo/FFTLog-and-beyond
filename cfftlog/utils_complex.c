@@ -39,7 +39,7 @@ double complex lngamma_lanczos(double complex z) {
 		9.984369578019570859563e-6,
 		1.50563273514931155834e-7};
 
-	if(creal(z) < 0.5) {return clog(M_PI / csin(M_PI*z)) - lngamma_lanczos(1. - z);}
+	if(creal(z) < 0.5) {return clog(M_PI) - clog(csin(M_PI*z)) - lngamma_lanczos(1. - z);}
 	z -= 1;
 	double complex x = p[0];
 	for(int n = 1; n < 9; n++){ x += p[n] / (z + (double)(n));}
