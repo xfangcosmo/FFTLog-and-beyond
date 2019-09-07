@@ -15,7 +15,7 @@ from numpy.fft import rfft, irfft
 
 class fftlog(object):
 
-	def __init__(self, x, fx, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
+	def __init__(self, x, fx, nu=1.1, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
 
 		self.x_origin = x # x is logarithmically spaced
 		# self.lnx = np.log(x)
@@ -86,7 +86,7 @@ class fftlog(object):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j'_\ell(xy),
 		where j_\ell is the spherical Bessel func of order ell.
-		array y is set as y[:] = (ell+2)/x[::-1]
+		array y is set as y[:] = (ell+1)/x[::-1]
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
@@ -100,7 +100,7 @@ class fftlog(object):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j''_\ell(xy),
 		where j_\ell is the spherical Bessel func of order ell.
-		array y is set as y[:] = (ell+3)/x[::-1]
+		array y is set as y[:] = (ell+1)/x[::-1]
 		"""
 		x0 = self.x[0]
 		z_ar = self.nu + 1j*self.eta_m
@@ -163,6 +163,9 @@ def g_m_vals(mu,q):
 
 	switching to asymptotic form when |Im(q)| + |mu| > cut = 200
 	'''
+	if(mu+1+q.real[0]==0):
+		print("gamma(0) encountered. Please change another nu value! Try nu=1.1 .")
+		exit()
 	imag_q= np.imag(q)
 	g_m=np.zeros(q.size, dtype=complex)
 	cut =200
