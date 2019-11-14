@@ -17,9 +17,10 @@ int main(int argc, char const *argv[])
 {
 	config my_config;
 	double ell = 1.;
-	my_config.nu = 1.;
+	my_config.nu = 1.01;
 	my_config.c_window_width = 0.25;
 	my_config.derivative = 0;
+	my_config.N_pad = 0;
 
 	char filename[] = "f1_chi.txt";
 	FILE *IN = fopen(filename, "r");

@@ -21,7 +21,7 @@ k, pk = np.loadtxt('../Pk_test', usecols=(0,1), unpack=True)
 N = k.size
 print('number of input data points: '+str(N))
 ell = 1
-nu = 1.
+nu = 1.01
 myfftlog = fftlog(k, pk, nu=nu, N_extrap_low=1500, N_extrap_high=1500, c_window_width=0.25, N_pad=5000)
 r, Fr = myfftlog.fftlog(ell)
 
@@ -46,8 +46,8 @@ subfig2.set_xlabel('y')
 subfig2.set_ylabel('F(y)')
 subfig2.plot(r, Fr, label='fftlog')
 
-r_c, Fr_c = np.loadtxt('../cfftlog/test_output.txt', usecols=(0,1), unpack=True)
-subfig2.plot(r_c, Fr_c, label='bad brutal')
+# r_c, Fr_c = np.loadtxt('../cfftlog/test_output.txt', usecols=(0,1), unpack=True)
+# subfig2.plot(r_c, Fr_c, label='(bad) brute-force')
 
 # r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
 # subfig2.plot(r_bf, Fr_bf)
@@ -61,7 +61,7 @@ print('Testing 1st & 2nd-derivative')
 r1, Fr1 = myfftlog.fftlog_dj(ell)
 r2, Fr2 = myfftlog.fftlog_ddj(ell)
 fig = plt.figure(figsize=(8,4))
-fig.suptitle(r'$F(y) = \int_0^\infty f(x)j_{\ell}\'(xy) dx/x, \ell=$%.1f'%(ell))
+fig.suptitle(r'$F(y) = \int_0^\infty f(x)j_{\ell}^{(n)}(xy) dx/x, \ell=$%.1f, n=1,2'%(ell))
 
 subfig1 = fig.add_subplot(1,2,1)
 subfig1.set_xscale('log')
@@ -89,12 +89,12 @@ plt.show()
 print('Testing hankel')
 
 n = 0
-nu = 1.
+nu = 1.01
 myhankel = hankel(k, pk, nu=nu, N_extrap_low=1500, N_extrap_high=1500, c_window_width=0.25)
 r, Fr = myhankel.hankel(n)
 
 fig = plt.figure(figsize=(8,4))
-fig.suptitle(r'$F(y) = \int_0^\infty f(x)J_{n}(xy) dx/x, n=$%.1f'%(n))
+fig.suptitle(r'$F(y) = \int_0^\infty f(x)J_{n}(xy) dx/x, n=$%d'%(n))
 
 subfig1 = fig.add_subplot(1,2,1)
 subfig1.set_xscale('log')

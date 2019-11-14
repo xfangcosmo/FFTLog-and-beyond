@@ -19,6 +19,7 @@ int main(int argc, char const *argv[])
 	my_config.nu = 1.5;
 	my_config.c_window_width = 0.25;
 	my_config.derivative = 0;
+	my_config.N_pad = 0;
 
 	char filename[] = "../Pk_test";
 	FILE *IN = fopen(filename, "r");
@@ -36,7 +37,7 @@ int main(int argc, char const *argv[])
 	int i,j;
 
 	int Nell = 100;
-	double ell[Nell];
+	int ell[Nell];
 	for(j=1;j<=Nell;j++) {
 		ell[j] = j; 
 	}
