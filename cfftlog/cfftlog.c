@@ -12,7 +12,7 @@
 #include "utils_complex.h"
 #include "cfftlog.h"
 
-void cfftlog(double *x, double *fx, long N, config *config, int ell, double *y, double *Fy) {
+void cfftlog(double *x, double *fx, long N, config *config, double ell, double *y, double *Fy) {
 
 	long N_original = N;
 	long N_pad = config->N_pad;
@@ -35,9 +35,9 @@ void cfftlog(double *x, double *fx, long N, config *config, int ell, double *y, 
 	double complex gl[halfN+1];
 	
 	switch(config->derivative) {
-		case 0: g_l((double)ell, config->nu, eta_m, gl, halfN+1); break;
-		case 1: g_l_1((double)ell, config->nu, eta_m, gl, halfN+1); break;
-		case 2: g_l_2((double)ell, config->nu, eta_m, gl, halfN+1); break;
+		case 0: g_l(ell, config->nu, eta_m, gl, halfN+1); break;
+		case 1: g_l_1(ell, config->nu, eta_m, gl, halfN+1); break;
+		case 2: g_l_2(ell, config->nu, eta_m, gl, halfN+1); break;
 		default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
 	}
 	// printf("g2[0]: %.15e+I*(%.15e)\n", creal(g2[0]),cimag(g2[0]));
@@ -89,7 +89,7 @@ void cfftlog(double *x, double *fx, long N, config *config, int ell, double *y, 
 	free(out_ifft);
 }
 
-void cfftlog_ells(double *x, double *fx, long N, config *config, int* ell, long Nell, double **y, double **Fy) {
+void cfftlog_ells(double *x, double *fx, long N, config *config, double* ell, long Nell, double **y, double **Fy) {
 
 	long N_original = N;
 	long N_pad = config->N_pad;
@@ -138,9 +138,9 @@ void cfftlog_ells(double *x, double *fx, long N, config *config, int* ell, long 
 
 	for(j=0; j<Nell; j++){
 		switch(config->derivative) {
-			case 0: g_l((double)ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 1: g_l_1((double)ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 2: g_l_2((double)ell[j], config->nu, eta_m, gl, halfN+1); break;
+			case 0: g_l(ell[j], config->nu, eta_m, gl, halfN+1); break;
+			case 1: g_l_1(ell[j], config->nu, eta_m, gl, halfN+1); break;
+			case 2: g_l_2(ell[j], config->nu, eta_m, gl, halfN+1); break;
 			default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
 		}
 
@@ -166,7 +166,7 @@ void cfftlog_ells(double *x, double *fx, long N, config *config, int* ell, long 
 	free(out_ifft);
 }
 
-void cfftlog_ells_increment(double *x, double *fx, long N, config *config, int* ell, long Nell, double **y, double **Fy) {
+void cfftlog_ells_increment(double *x, double *fx, long N, config *config, double* ell, long Nell, double **y, double **Fy) {
 
 	long N_original = N;
 	long N_pad = config->N_pad;
@@ -215,9 +215,9 @@ void cfftlog_ells_increment(double *x, double *fx, long N, config *config, int* 
 
 	for(j=0; j<Nell; j++){
 		switch(config->derivative) {
-			case 0: g_l((double)ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 1: g_l_1((double)ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 2: g_l_2((double)ell[j], config->nu, eta_m, gl, halfN+1); break;
+			case 0: g_l(ell[j], config->nu, eta_m, gl, halfN+1); break;
+			case 1: g_l_1(ell[j], config->nu, eta_m, gl, halfN+1); break;
+			case 2: g_l_2(ell[j], config->nu, eta_m, gl, halfN+1); break;
 			default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
 		}
 

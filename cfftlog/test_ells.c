@@ -37,9 +37,9 @@ int main(int argc, char const *argv[])
 	int i,j;
 
 	int Nell = 100;
-	int ell[Nell];
+	double ell[Nell];
 	for(j=1;j<=Nell;j++) {
-		ell[j] = j; 
+		ell[j] = (double)j; 
 	}
 
 	double **r, **result;
