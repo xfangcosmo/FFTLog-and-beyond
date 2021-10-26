@@ -22,6 +22,7 @@ fftlogx_lib = load_library("../build/libfftlogx.so")
 cdouble = ctypes.c_double
 cint 	= ctypes.c_int
 clong 	= ctypes.c_long
+_doublepp = np.ctypeslib.ndpointer(dtype=np.uintp, ndim=1, flags='C')
 
 def _array_ctype(ndim, dtype=np.float64, flags="C_CONTIGUOUS"):
     return [np.ctypeslib.ndpointer(ndim=ndim, dtype=dtype, flags=flags)]
@@ -47,8 +48,8 @@ cfftlog_ells_wrapper.argtypes = [*_array_ctype(ndim=1, dtype=np.float64), # x
 								 clong, 		 						  # N
 								 *_array_ctype(ndim=1, dtype=np.float64), # ell array
 								 clong,							 	  	  # Nell
-								 *_array_ctype(ndim=2, dtype=np.float64), # y
-								 *_array_ctype(ndim=2, dtype=np.float64), # Fy
+								 _doublepp, # y
+								 _doublepp, # Fy
 								 cdouble, 								  # nu
 								 cdouble, 								  # c_window_width
 								 cint,								 	  # derivative (of Bessel)

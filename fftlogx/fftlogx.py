@@ -91,16 +91,21 @@ class fftlog(object):
 		"""
 		cfftlog_ells wrapper
 		"""
-		Nell = ell_array.size
+		Nell = ell_array.shape[0]
 		y = np.zeros((Nell,self.N))
 		Fy= np.zeros((Nell,self.N))
-		cfftlog_wrapper(*array_arg(np.ascontiguousarray(self.x, dtype=np.float64)),
-						*array_arg(np.ascontiguousarray(self.fx, dtype=np.float64)),
+		ypp = (y.__array_interface__['data'][0] 
+      			+ np.arange(Nell)*y.strides[0]).astype(np.uintp) 
+		Fypp = (Fy.__array_interface__['data'][0] 
+				+ np.arange(Nell)*Fy.strides[0]).astype(np.uintp)
+
+		cfftlog_ells_wrapper(np.ascontiguousarray(self.x, dtype=np.float64),
+						np.ascontiguousarray(self.fx, dtype=np.float64),
 						clong(self.N),
-						*array_arg(np.ascontiguousarray(ell_array, dtype=np.float64)),
-						clong(Nell)
-						*array_arg(np.ascontiguousarray(y, dtype=np.float64)),
-						*array_arg(np.ascontiguousarray(Fy, dtype=np.float64)),
+						np.ascontiguousarray(ell_array, dtype=np.float64),
+						clong(Nell),
+						ypp,
+						Fypp,
 						cdouble(self.nu),
 						cdouble(self.c_window_width),
 						cint(derivative),

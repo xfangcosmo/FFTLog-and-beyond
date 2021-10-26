@@ -67,7 +67,7 @@ Calculate g_l = exp( zln2 + lngamma( (l+nu)/2 + I*eta/2 ) - lngamma( (3+l-nu)/2 
 	double complex z;
 	for(i=0; i<N; i++) {
 		z = nu+I*eta[i];
-		if(l+fabs(eta[i])<500){
+		if(l+fabs(eta[i])<200){
 			// gl[i] = cexp(z*log(2.) + clog(gamma_lanczos((l+z)/2.) ) - clog(gamma_lanczos((3.+l-z)/2.)));
 			gl[i] = cexp(z*log(2.) + lngamma_lanczos((l+z)/2.) - lngamma_lanczos((3.+l-z)/2.) );	
 		}else{
@@ -84,7 +84,7 @@ Calculate g_l_1 = exp(zln2 + lngamma( (l+nu-1)/2 + I*eta/2 ) - lngamma( (4+l-nu)
 	double complex z;
 	for(i=0; i<N; i++) {
 		z = nu+I*eta[i];
-		if(l+fabs(eta[i])<500){
+		if(l+fabs(eta[i])<200){
 			gl1[i] = -(z-1.)* cexp((z-1.)*log(2.) + lngamma_lanczos((l+z-1.)/2.) - lngamma_lanczos((4.+l-z)/2.));
 		}else{
 			gl1[i] = -(z-1.)* cexp((z-1.)*log(2.) + ln_g_m_vals(l+0.5, z-2.5));
