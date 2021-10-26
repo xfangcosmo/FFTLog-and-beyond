@@ -22,6 +22,8 @@ fftlogx_lib = load_library("../build/libfftlogx.so")
 cdouble = ctypes.c_double
 cint 	= ctypes.c_int
 clong 	= ctypes.c_long
+
+# Based on Stackoverflow: https://stackoverflow.com/questions/22425921/pass-a-2d-numpy-array-to-c-using-ctypes
 _doublepp = np.ctypeslib.ndpointer(dtype=np.uintp, ndim=1, flags='C')
 
 def _array_ctype(ndim, dtype=np.float64, flags="C_CONTIGUOUS"):
