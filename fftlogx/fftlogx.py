@@ -72,7 +72,7 @@ class fftlog(object):
 		"""
 		y = np.zeros(self.N)
 		Fy= np.zeros(self.N)
-		print(self.x, self.x.shape)
+		# print(self.x, self.x.shape)
 		cfftlog_wrapper(np.ascontiguousarray(self.x, dtype=np.float64),
 						np.ascontiguousarray(self.fx, dtype=np.float64),
 						clong(self.N),
@@ -100,6 +100,33 @@ class fftlog(object):
 				+ np.arange(Nell)*Fy.strides[0]).astype(np.uintp)
 
 		cfftlog_ells_wrapper(np.ascontiguousarray(self.x, dtype=np.float64),
+						np.ascontiguousarray(self.fx, dtype=np.float64),
+						clong(self.N),
+						np.ascontiguousarray(ell_array, dtype=np.float64),
+						clong(Nell),
+						ypp,
+						Fypp,
+						cdouble(self.nu),
+						cdouble(self.c_window_width),
+						cint(derivative),
+						clong(0) # Here N_pad is done in python, not in C
+						)
+
+		return y[:,self.N_extrap_high:self.N-self.N_extrap_low], Fy[:,self.N_extrap_high:self.N-self.N_extrap_low]
+
+	def _fftlog_modified_ells(self, ell_array, derivative):
+		"""
+		cfftlog_ells wrapper
+		"""
+		Nell = ell_array.shape[0]
+		y = np.zeros((Nell,self.N))
+		Fy= np.zeros((Nell,self.N))
+		ypp = (y.__array_interface__['data'][0] 
+      			+ np.arange(Nell)*y.strides[0]).astype(np.uintp) 
+		Fypp = (Fy.__array_interface__['data'][0] 
+				+ np.arange(Nell)*Fy.strides[0]).astype(np.uintp)
+
+		cfftlog_modified_ells_wrapper(np.ascontiguousarray(self.x, dtype=np.float64),
 						np.ascontiguousarray(self.fx, dtype=np.float64),
 						clong(self.N),
 						np.ascontiguousarray(ell_array, dtype=np.float64),
@@ -162,6 +189,30 @@ class fftlog(object):
 		array y is set as y[:] = (ell+1)/x[::-1]
 		"""
 		return self._fftlog_ells(ell_array, 2)
+
+	def fftlog_modified_ells(self, ell_array):
+		"""
+		Calculate F(y) = \int_0^\infty dx / x * f(x)/(xy)^2 * j_\ell(xy),
+		where j_\ell is the spherical Bessel func of order ell.
+		array y is set as y[:] = (ell+1)/x[::-1]
+		"""
+		return self._fftlog_modified_ells(ell_array, 0)
+
+	def fftlog_dj_modified_ells(self, ell_array):
+		"""
+		Calculate F(y) = \int_0^\infty dx / x * f(x)/(xy)^2 * j'_\ell(xy),
+		where j_\ell is the spherical Bessel func of order ell.
+		array y is set as y[:] = (ell+1)/x[::-1]
+		"""
+		return self._fftlog_modified_ells(ell_array, 1)
+
+	def fftlog_ddj_modified_ells(self, ell_array):
+		"""
+		Calculate F(y) = \int_0^\infty dx / x * f(x)/(xy)^2 * j''_\ell(xy),
+		where j_\ell is the spherical Bessel func of order ell.
+		array y is set as y[:] = (ell+1)/x[::-1]
+		"""
+		return self._fftlog_modified_ells(ell_array, 2)
 
 
 class hankel(object):
