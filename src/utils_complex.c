@@ -3,6 +3,7 @@
 #include <complex.h>
 
 #include "utils.h"
+#include "utils_complex.h"
 
 double complex gamma_lanczos(double complex z) {
 /* Lanczos coefficients for g = 7 */
@@ -54,10 +55,25 @@ use asymptotic expansion for large |mu+q| */
 	double complex asym_plus = (mu+1+ q)/2.;
 	double complex asym_minus= (mu+1- q)/2.;
 
-	return (asym_plus-0.5)*clog(asym_plus) - (asym_minus-0.5)*clog(asym_minus) - q \
-		+1./12 *(1./asym_plus - 1./asym_minus) \
-		+1./360.*(1./cpow(asym_minus,3) - 1./cpow(asym_plus,3)) \
-		+1./1260*(1./cpow(asym_plus,5) - 1./cpow(asym_minus,5));
+	return ln_g_m_ratio(asym_plus, asym_minus);
+}
+
+double complex ln_g_m_ratio(double complex a, double complex b) {
+/* ln(gamma(a)/gamma(b))
+use asymptotic expansion for large |a| */
+	return (a-0.5)*clog(a) - (b-0.5)*clog(b) - a + b \
+		+1./12 *(1./a - 1./b) \
+		+1./360.*(1./cpow(b,3) - 1./cpow(a,3)) \
+		+1./1260*(1./cpow(a,5) - 1./cpow(b,5));
+}
+
+double complex lngamma_large(double complex a) {
+/* lngamma(a)
+use asymptotic expansion for large |a| */
+	return (a-0.5)*clog(a) - a + 0.5*log(2.*2*M_PI) \
+		+1./12 /a \
+		-1./360./cpow(a,3) \
+		+1./1260/cpow(a,5);
 }
 
 void g_l(double l, double nu, double *eta, double complex *gl, long N) {
@@ -103,6 +119,27 @@ Calculate g_l_1 = exp(zln2 + lngamma( (l+nu-2)/2 + I*eta/2 ) - lngamma( (5+l-nu)
 			gl2[i] = (z-1.)* (z-2.)* cexp((z-2.)*log(2.) + lngamma_lanczos((l+z-2.)/2.) - lngamma_lanczos((5.+l-z)/2.));
 		}else{
 			gl2[i] = (z-1.)* (z-2.)* cexp((z-2.)*log(2.) + ln_g_m_vals(l+0.5, z-3.5));
+		}
+	}
+}
+
+void h_l(double l, double nu, double *eta, double complex *hl, long N) {
+/* z = nu + I*eta */
+	long i;
+	double complex z;
+	double lngamma_l_factor;
+	for(i=0; i<N; i++) {
+		z = nu+I*eta[i];
+		if(l<100){
+			lngamma_l_factor = lngamma_lanczos(1.5+l);
+		}else{
+			lngamma_l_factor = lngamma_large(1.5+l);
+		}
+		if(l+fabs(eta[i])<200){
+			hl[i] = cexp(lngamma_l_factor + lngamma_lanczos(l +z/2.) + lngamma_lanczos((2.-z)/2.) \
+						- lngamma_lanczos(2+l-z/2.) - lngamma_lanczos((3.-z)/2.) );
+		}else{
+			hl[i] = cexp(lngamma_l_factor + ln_g_m_vals(2*l+1., z-2.) + ln_g_m_ratio((2.-z)/2., (3.-z)/2.));
 		}
 	}
 }

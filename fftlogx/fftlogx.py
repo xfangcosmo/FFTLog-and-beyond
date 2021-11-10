@@ -66,7 +66,7 @@ class fftlog(object):
 	# 	c_m = c_m*c_window(m, int(self.c_window_width*self.N//2.) )
 	# 	return m, c_m
 
-	def _fftlog(self, ell, derivative):
+	def _fftlog(self, ell, derivative, j_squared=0):
 		"""
 		cfftlog wrapper
 		"""
@@ -82,12 +82,13 @@ class fftlog(object):
 						cdouble(self.nu),
 						cdouble(self.c_window_width),
 						cint(derivative),
+						cint(j_squared),
 						clong(0) # Here N_pad is done in python, not in C
 						)
 
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
 
-	def _fftlog_ells(self, ell_array, derivative):
+	def _fftlog_ells(self, ell_array, derivative, j_squared=0):
 		"""
 		cfftlog_ells wrapper
 		"""
@@ -109,15 +110,19 @@ class fftlog(object):
 						cdouble(self.nu),
 						cdouble(self.c_window_width),
 						cint(derivative),
+						cint(j_squared),
 						clong(0) # Here N_pad is done in python, not in C
 						)
 
 		return y[:,self.N_extrap_high:self.N-self.N_extrap_low], Fy[:,self.N_extrap_high:self.N-self.N_extrap_low]
 
-	def _fftlog_modified_ells(self, ell_array, derivative):
+	def _fftlog_modified_ells(self, ell_array, derivative, j_squared=0):
 		"""
 		cfftlog_ells wrapper
 		"""
+		if(j_squared!=0):
+			raise ValueError('j_squared Not supported for modified fftlog!')
+
 		Nell = ell_array.shape[0]
 		y = np.zeros((Nell,self.N))
 		Fy= np.zeros((Nell,self.N))
@@ -136,6 +141,7 @@ class fftlog(object):
 						cdouble(self.nu),
 						cdouble(self.c_window_width),
 						cint(derivative),
+						cint(j_squared),
 						clong(0) # Here N_pad is done in python, not in C
 						)
 
@@ -166,6 +172,14 @@ class fftlog(object):
 		"""
 		return self._fftlog(ell, 2)
 
+	def fftlog_jsqr(self, ell):
+		"""
+		Calculate F(y) = \int_0^\infty dx / x * f(x) * |j_\ell(xy)|^2,
+		where j_\ell is the spherical Bessel func of order ell.
+		array y is set as y[:] = (ell+1)/x[::-1]
+		"""
+		return self._fftlog(ell, 0, j_squared=1)
+
 	def fftlog_ells(self, ell_array):
 		"""
 		Calculate F(y) = \int_0^\infty dx / x * f(x) * j_\ell(xy),
@@ -189,6 +203,15 @@ class fftlog(object):
 		array y is set as y[:] = (ell+1)/x[::-1]
 		"""
 		return self._fftlog_ells(ell_array, 2)
+
+	def fftlog_jsqr_ells(self, ell_array):
+		"""
+		Calculate F(y) = \int_0^\infty dx / x * f(x) * j_\ell(xy),
+		where j_\ell is the spherical Bessel func of order ell.
+		array y is set as y[:] = (ell+1)/x[::-1]
+		"""
+		return self._fftlog_ells(ell_array, 0, j_squared=1)
+
 
 	def fftlog_modified_ells(self, ell_array):
 		"""

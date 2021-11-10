@@ -110,6 +110,21 @@ class fftlog(object):
 		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
 		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
 
+	def fftlog_jsqr(self, ell):
+		"""
+		Calculate F(y) = \int_0^\infty dx / x * f(x) * (j_\ell(xy))^2,
+		where j_\ell is the spherical Bessel func of order ell.
+		array y is set as y[:] = (ell+1)/x[::-1]
+		"""
+		x0 = self.x[0]
+		z_ar = self.nu + 1j*self.eta_m
+		y = (ell+1.) / self.x[::-1]
+		h_m = self.c_m * (self.x[0]*y[0])**(-1j*self.eta_m) * h_l(ell, z_ar)
+
+		Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi)/4.
+		print(self.N_extrap_high,self.N,self.N_extrap_low)
+		return y[self.N_extrap_high:self.N-self.N_extrap_low], Fy[self.N_extrap_high:self.N-self.N_extrap_low]
+
 
 
 class hankel(object):
@@ -187,6 +202,31 @@ def g_m_vals(mu,q):
 	g_m[np.where(q==mu+1+0.0j)[0]] = 0.+0.0j
 	return g_m
 
+def g_m_ratio(a):
+	'''
+	g_m_ratio(a) = gamma(a)/gamma(a+0.5)
+	switching to asymptotic form when |Im(a)| > cut = 200
+	'''
+	if(a.real[0]==0):
+		print("gamma(0) encountered. Please change another nu value! Try nu=1.1 .")
+		exit()
+	imag_a= np.imag(a)
+	g_m=np.zeros(a.size, dtype=complex)
+	cut =100
+	asym_a=a[np.absolute(imag_a) >cut]
+	asym_a_plus = asym_a+0.5
+
+	a_good=a[ (np.absolute(imag_a) <=cut)]
+	
+	g_m[(np.absolute(imag_a) <=cut)] =gamma(a)/gamma(a+0.5)
+
+	# asymptotic form 								
+	g_m[np.absolute(imag_a)>cut] = np.exp( (asym_a-0.5)*np.log(asym_a) - asym_a*np.log(asym_a_plus) + 0.5 \
+		+1./12 *(1./asym_a - 1./asym_a_plus) +1./360.*(1./asym_a_plus**3 - 1./asym_a**3) +1./1260*(1./asym_a**5 - 1./asym_a_plus**5) )
+
+	# g_m[np.where(q==mu+1+0.0j)[0]] = 0.+0.0j
+	return g_m
+
 def g_l(l,z_array):
 	'''
 	gl = 2^z_array * gamma((l+z_array)/2.) / gamma((3.+l-z_array)/2.)
@@ -218,3 +258,11 @@ def g_l_2(l,z_array):
 	gl2 = 2.**(z_array-2) *(z_array -1)*(z_array -2)* g_m_vals(l+0.5,z_array-3.5)
 	return gl2
 
+def h_l(l,z_array):
+	'''
+	hl = gamma(3/2.+l) * gamma(l+ z_array/2.) * gamma((2.-z_array)/2.) / gamma((3.-z_array)/2.) / gamma(2.+l -z_array/2.)
+	first component is g_m_vals(2l+1, z_array - 2)
+	second component is gamma((2.-z_array)/2.) / gamma((3.-z_array)/2.)
+	'''
+	hl = g_m_vals(2*l+1., z_array - 2.) * g_m_ratio((2.-z_array)/2.)
+	return hl

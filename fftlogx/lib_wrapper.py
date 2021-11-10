@@ -39,6 +39,7 @@ cfftlog_wrapper.argtypes = [*_array_ctype(ndim=1, dtype=np.float64), # x
 							cdouble, 								 # nu
 							cdouble, 								 # c_window_width
 							cint,									 # derivative (of Bessel)
+							cint,									 # j_squared
 							clong									 # N_pad
 							]
 
@@ -55,6 +56,7 @@ cfftlog_ells_wrapper.argtypes = [*_array_ctype(ndim=1, dtype=np.float64), # x
 								 cdouble, 								  # nu
 								 cdouble, 								  # c_window_width
 								 cint,								 	  # derivative (of Bessel)
+								 cint,									  # j_squared
 								 clong									  # N_pad
 								 ]
 
@@ -69,6 +71,7 @@ cfftlog_modified_ells_wrapper.argtypes = [*_array_ctype(ndim=1, dtype=np.float64
 								 cdouble, 								  # nu
 								 cdouble, 								  # c_window_width
 								 cint,								 	  # derivative (of Bessel)
+								 cint,									  # j_squared
 								 clong									  # N_pad
 								 ]
 

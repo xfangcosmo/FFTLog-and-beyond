@@ -4,6 +4,7 @@ The tests contain:
 -- integrals with 1 spherical Bessel function;
 -- integrals with 1 1st-derivative of spherical Bessel function;
 -- integrals with 1 2nd-derivative of spherical Bessel function;
+-- integrals with 1 spherical Bessel function squared;
 -- integrals with 1 (cylindrical) Bessel function, i.e. Hankel transform;
 
 by Xiao Fang
@@ -111,6 +112,36 @@ subfig2.set_ylabel('F(y)')
 for i in range(10):
 	# subfig2.plot(r1[i*10], abs(Fr1[i*10]), label=r"1st-derivative, $\ell=%d$"%(ell_ar[i*10]))
 	subfig2.plot(r2[i*10], abs(Fr2[i*10]), label=r'$\ell=%d$'%(ell_ar[i*10]))
+# r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
+# subfig2.plot(r_bf, Fr_bf)
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+################# Test j sqr ##############
+print('Testing j squared')
+
+r2, Fr2 = myfftlog.fftlog_jsqr_ells(ell_ar)
+fig = plt.figure(figsize=(8,4))
+fig.suptitle(r'$F(y) = \int_0^{\infty} f(x)|j_{\ell}(xy)|^2 dx/x$')
+
+subfig1 = fig.add_subplot(1,2,1)
+subfig1.set_xscale('log')
+subfig1.set_yscale('log')
+subfig1.set_xlabel('x')
+subfig1.set_ylabel('|f(x)|')
+subfig1.plot(k, pk)
+plt.tight_layout()
+
+subfig2 = fig.add_subplot(1,2,2)
+subfig2.set_title(r'$\nu=$%.2f'%(nu))
+subfig2.set_xscale('log')
+subfig2.set_yscale('log')
+subfig2.set_xlabel('y')
+subfig2.set_ylabel('F(y)')
+for i in range(10):
+	# subfig2.plot(r1[i*10], abs(Fr1[i*10]), label=r"1st-derivative, $\ell=%d$"%(ell_ar[i*10]))
+	subfig2.plot(r2[i*10], Fr2[i*10], label=r'$\ell=%d$'%(ell_ar[i*10]))
 # r_bf, Fr_bf = np.loadtxt('test_bruteforce.txt', usecols=(0,1), unpack=True)
 # subfig2.plot(r_bf, Fr_bf)
 plt.legend()

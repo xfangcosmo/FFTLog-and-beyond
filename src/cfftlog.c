@@ -12,11 +12,12 @@
 #include "utils_complex.h"
 #include "cfftlog.h"
 
-void cfftlog_wrapper(double *x, double *fx, long N, double ell, double *y, double *Fy, double nu, double c_window_width, int derivative, long N_pad){
+void cfftlog_wrapper(double *x, double *fx, long N, double ell, double *y, double *Fy, double nu, double c_window_width, int derivative, int j_squared, long N_pad){
 	config my_config;
 	my_config.nu = nu;
 	my_config.c_window_width = c_window_width;
 	my_config.derivative = derivative;
+	my_config.j_squared = j_squared;
 	my_config.N_pad = N_pad;
 	cfftlog(x, fx, N, &my_config, ell, y, Fy);
 }
@@ -42,12 +43,16 @@ void cfftlog(double *x, double *fx, long N, config *config, double ell, double *
 	for(i=0; i<=halfN; i++) {eta_m[i] = 2*M_PI / dlnx / N * i;}
 
 	double complex gl[halfN+1];
-	
-	switch(config->derivative) {
-		case 0: g_l(ell, config->nu, eta_m, gl, halfN+1); break;
-		case 1: g_l_1(ell, config->nu, eta_m, gl, halfN+1); break;
-		case 2: g_l_2(ell, config->nu, eta_m, gl, halfN+1); break;
-		default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
+
+	if(config->j_squared ==0){
+		switch(config->derivative) {
+			case 0: g_l(ell, config->nu, eta_m, gl, halfN+1); break;
+			case 1: g_l_1(ell, config->nu, eta_m, gl, halfN+1); break;
+			case 2: g_l_2(ell, config->nu, eta_m, gl, halfN+1); break;
+			default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
+		}
+	}else{
+		h_l(ell, config->nu, eta_m, gl, halfN+1);
 	}
 	// printf("g2[0]: %.15e+I*(%.15e)\n", creal(g2[0]),cimag(g2[0]));
 
@@ -98,11 +103,12 @@ void cfftlog(double *x, double *fx, long N, config *config, double ell, double *
 	free(out_ifft);
 }
 
-void cfftlog_ells_wrapper(double *x, double *fx, long N, double* ell, long Nell, double **y, double **Fy, double nu, double c_window_width, int derivative, long N_pad){
+void cfftlog_ells_wrapper(double *x, double *fx, long N, double* ell, long Nell, double **y, double **Fy, double nu, double c_window_width, int derivative, int j_squared, long N_pad){
 	config my_config;
 	my_config.nu = nu;
 	my_config.c_window_width = c_window_width;
 	my_config.derivative = derivative;
+	my_config.j_squared = j_squared;
 	my_config.N_pad = N_pad;
 	cfftlog_ells(x, fx, N, &my_config, ell, Nell, y, Fy);
 }
@@ -155,11 +161,15 @@ void cfftlog_ells(double *x, double *fx, long N, config *config, double* ell, lo
 	plan_backward = fftw_plan_dft_c2r_1d(N, out_vary, out_ifft, FFTW_ESTIMATE);
 
 	for(j=0; j<Nell; j++){
-		switch(config->derivative) {
-			case 0: g_l(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 1: g_l_1(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 2: g_l_2(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
+		if(config->j_squared ==0){
+			switch(config->derivative) {
+				case 0: g_l(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				case 1: g_l_1(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				case 2: g_l_2(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
+			}
+		}else{
+			h_l(ell[j], config->nu, eta_m, gl, halfN+1);
 		}
 
 		// calculate y arrays
@@ -184,11 +194,12 @@ void cfftlog_ells(double *x, double *fx, long N, config *config, double* ell, lo
 	free(out_ifft);
 }
 
-void cfftlog_modified_ells_wrapper(double *x, double *fx, long N, double* ell, long Nell, double **y, double **Fy, double nu, double c_window_width, int derivative, long N_pad){
+void cfftlog_modified_ells_wrapper(double *x, double *fx, long N, double* ell, long Nell, double **y, double **Fy, double nu, double c_window_width, int derivative, int j_squared, long N_pad){
 	config my_config;
 	my_config.nu = nu;
 	my_config.c_window_width = c_window_width;
 	my_config.derivative = derivative;
+	my_config.j_squared = j_squared;
 	my_config.N_pad = N_pad;
 	cfftlog_modified_ells(x, fx, N, &my_config, ell, Nell, y, Fy);
 }
@@ -241,12 +252,18 @@ void cfftlog_modified_ells(double *x, double *fx, long N, config *config, double
 	plan_backward = fftw_plan_dft_c2r_1d(N, out_vary, out_ifft, FFTW_ESTIMATE);
 
 	for(j=0; j<Nell; j++){
-		switch(config->derivative) {
-			case 0: g_l_modified(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 1: g_l_1_modified(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 2: g_l_2_modified(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
+		if(config->j_squared ==0){
+			switch(config->derivative) {
+				case 0: g_l_modified(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				case 1: g_l_1_modified(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				case 2: g_l_2_modified(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
+			}
+		}else{
+			printf("j_sqr Integral Not Supported for modified version!\n");
+			exit(1);
 		}
+
 
 		// calculate y arrays
 		for(i=0; i<N_original; i++) {y[j][i] = (ell[j]+1.) / x[N_original-1-i];}
@@ -319,11 +336,15 @@ void cfftlog_ells_increment(double *x, double *fx, long N, config *config, doubl
 	plan_backward = fftw_plan_dft_c2r_1d(N, out_vary, out_ifft, FFTW_ESTIMATE);
 
 	for(j=0; j<Nell; j++){
-		switch(config->derivative) {
-			case 0: g_l(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 1: g_l_1(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			case 2: g_l_2(ell[j], config->nu, eta_m, gl, halfN+1); break;
-			default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
+		if(config->j_squared ==0){
+			switch(config->derivative) {
+				case 0: g_l(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				case 1: g_l_1(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				case 2: g_l_2(ell[j], config->nu, eta_m, gl, halfN+1); break;
+				default: printf("Integral Not Supported! Please choose config->derivative from [0,1,2].\n");
+			}
+		}else{
+			h_l(ell[j], config->nu, eta_m, gl, halfN+1);
 		}
 
 		// calculate y arrays
