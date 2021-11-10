@@ -218,7 +218,7 @@ def g_m_ratio(a):
 
 	a_good=a[ (np.absolute(imag_a) <=cut)]
 	
-	g_m[(np.absolute(imag_a) <=cut)] =gamma(a)/gamma(a+0.5)
+	g_m[(np.absolute(imag_a) <=cut)] =gamma(a_good)/gamma(a_good+0.5)
 
 	# asymptotic form 								
 	g_m[np.absolute(imag_a)>cut] = np.exp( (asym_a-0.5)*np.log(asym_a) - asym_a*np.log(asym_a_plus) + 0.5 \
@@ -264,5 +264,5 @@ def h_l(l,z_array):
 	first component is g_m_vals(2l+1, z_array - 2)
 	second component is gamma((2.-z_array)/2.) / gamma((3.-z_array)/2.)
 	'''
-	hl = g_m_vals(2*l+1., z_array - 2.) * g_m_ratio((2.-z_array)/2.)
+	hl = g_m_vals(2*l+1., z_array - 2.) * g_m_ratio((2.-z_array)/2.) * gamma(l+1.5)
 	return hl

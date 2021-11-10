@@ -20,7 +20,7 @@ print('nu is required to be between -ell to 2.')
 k, pk = np.loadtxt('../Pk_test', usecols=(0,1), unpack=True)
 N = k.size
 print('number of input data points: '+str(N))
-ell = 1
+ell = 100
 nu = 1.01
 myfftlog = fftlog(k, pk, nu=nu, N_extrap_low=1500, N_extrap_high=1500, c_window_width=0.25, N_pad=5000)
 r, Fr = myfftlog.fftlog(ell)
