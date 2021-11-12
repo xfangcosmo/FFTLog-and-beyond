@@ -260,9 +260,9 @@ def g_l_2(l,z_array):
 
 def h_l(l,z_array):
 	'''
-	hl = gamma(3/2.+l) * gamma(l+ z_array/2.) * gamma((2.-z_array)/2.) / gamma((3.-z_array)/2.) / gamma(2.+l -z_array/2.)
+	hl = gamma(l+ z_array/2.) * gamma((2.-z_array)/2.) / gamma((3.-z_array)/2.) / gamma(2.+l -z_array/2.)
 	first component is g_m_vals(2l+1, z_array - 2)
 	second component is gamma((2.-z_array)/2.) / gamma((3.-z_array)/2.)
 	'''
-	hl = g_m_vals(2*l+1., z_array - 2.) * g_m_ratio((2.-z_array)/2.) * gamma(l+1.5)
+	hl = g_m_vals(2*l+1., z_array - 2.) * g_m_ratio((2.-z_array)/2.)
 	return hl

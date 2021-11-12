@@ -21,4 +21,3 @@ double complex lngamma_lanczos(double complex z);
 double complex ln_g_m_vals(double mu, double complex q);
 
 double complex ln_g_m_ratio(double complex a, double complex b);
-double complex lngamma_large(double complex a);

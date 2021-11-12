@@ -67,15 +67,6 @@ use asymptotic expansion for large |a| */
 		+1./1260*(1./cpow(a,5) - 1./cpow(b,5));
 }
 
-double complex lngamma_large(double complex a) {
-/* lngamma(a)
-use asymptotic expansion for large |a| */
-	return (a-0.5)*clog(a) - a + 0.5*log(2.*2*M_PI) \
-		+1./12 /a \
-		-1./360./cpow(a,3) \
-		+1./1260/cpow(a,5);
-}
-
 void g_l(double l, double nu, double *eta, double complex *gl, long N) {
 /* z = nu + I*eta
 Calculate g_l = exp( zln2 + lngamma( (l+nu)/2 + I*eta/2 ) - lngamma( (3+l-nu)/2 - I*eta/2 ) ) */
@@ -127,19 +118,13 @@ void h_l(double l, double nu, double *eta, double complex *hl, long N) {
 /* z = nu + I*eta */
 	long i;
 	double complex z;
-	double lngamma_l_factor;
 	for(i=0; i<N; i++) {
 		z = nu+I*eta[i];
-		if(l<100){
-			lngamma_l_factor = lngamma_lanczos(1.5+l);
-		}else{
-			lngamma_l_factor = lngamma_large(1.5+l);
-		}
 		if(l+fabs(eta[i])<200){
-			hl[i] = cexp(lngamma_l_factor + lngamma_lanczos(l +z/2.) + lngamma_lanczos((2.-z)/2.) \
+			hl[i] = cexp(lngamma_lanczos(l +z/2.) + lngamma_lanczos((2.-z)/2.) \
 						- lngamma_lanczos(2+l-z/2.) - lngamma_lanczos((3.-z)/2.) );
 		}else{
-			hl[i] = cexp(lngamma_l_factor + ln_g_m_vals(2*l+1., z-2.) + ln_g_m_ratio((2.-z)/2., (3.-z)/2.));
+			hl[i] = cexp(ln_g_m_vals(2*l+1., z-2.) + ln_g_m_ratio((2.-z)/2., (3.-z)/2.));
 		}
 	}
 }
