@@ -80,7 +80,7 @@ void cfftlog(double *x, double *fx, long N, config *config, double ell, double *
 	fftw_execute(plan_backward);
 
 	for(i=0; i<N_original; i++) {
-		Fy[i] = out_ifft[i-N_pad] * sqrt(M_PI) / (4.*N * pow(y[i], config->nu));
+		Fy[i] = out_ifft[i+N_pad] * sqrt(M_PI) / (4.*N * pow(y[i], config->nu));
 	}
 
 	fftw_destroy_plan(plan_forward);
