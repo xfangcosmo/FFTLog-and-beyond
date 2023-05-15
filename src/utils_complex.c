@@ -132,29 +132,17 @@ void h_l(double l, double nu, double *eta, double complex *hl, long N) {
 void g_l_modified(double l, double nu, double *eta, double complex *gl, long N) {
 	long i;
 	double complex z;
-	g_l(l, nu, eta, gl, N);
-	for(i=0; i<N; i++) {
-		z = nu+I*eta[i];
-		gl[i] /= ((l-2.+z)*(3.+l-z));
-	}
+	g_l(l, nu - 2, eta, gl, N);
 }
 void g_l_1_modified(double l, double nu, double *eta, double complex *gl, long N) {
 	long i;
 	double complex z;
-	g_l_1(l, nu, eta, gl, N);
-	for(i=0; i<N; i++) {
-		z = nu+I*eta[i];
-		gl[i] /= ((l-2.+z)*(3.+l-z));
-	}
+	g_l_1(l, nu - 2, eta, gl, N);
 }
 void g_l_2_modified(double l, double nu, double *eta, double complex *gl, long N) {
 	long i;
 	double complex z;
-	g_l_2(l, nu, eta, gl, N);
-	for(i=0; i<N; i++) {
-		z = nu+I*eta[i];
-		gl[i] /= ((l-2.+z)*(3.+l-z));
-	}
+	g_l_2(l, nu - 2, eta, gl, N);
 }
 
 void c_window(double complex *out, double c_window_width, long halfN) {
