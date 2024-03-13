@@ -17,7 +17,7 @@ def load_library(libname, path=None):
 	lib=ctypes.cdll.LoadLibrary(lib_name)
 	return lib
 
-fftlogx_lib = load_library("../build/libfftlogx.so")
+fftlogx_lib = load_library("libfftlogx.so")
 
 cdouble = ctypes.c_double
 cint 	= ctypes.c_int
