@@ -10,11 +10,11 @@ An extended FFTLog code for efficiently computing integrals containing:
 
 v2.0: fftlogx
 
-The code is written in C ([./src/](src)) and provides a python wrapper ([./fftlogx/](fftlogx)). To use it, first run
+The code is written in C ([./src/](src)) and provides a python wrapper ([./fftlogx/](fftlogx)). To use it, run
 ```shell
-make
+python setup.py install
 ```
-to build a shared library `libfftlogx.so`, then follow the test python scripts provided in [/fftlogx/](fftlogx) to import and use it.
+to construct install the interface, then follow the test notebook provided in [/test/](test) to import and use it.
 
 -----
 
