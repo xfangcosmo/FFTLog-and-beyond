@@ -1,0 +1,8 @@
+# build directory
+build/
+dist/
+fftlogx.egg-info/
+
+# binary
+__pycache__/
+*.so

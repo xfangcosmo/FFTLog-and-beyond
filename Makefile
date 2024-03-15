@@ -16,8 +16,10 @@ SRC = $(addprefix $(SRC_DIR)/,$(_SRC))
 
 all: $(LIB).so
 
-$(LIB).so:
-	if ! [ -e $(BUILD_DIR) ]; then mkdir $(BUILD_DIR); fi;
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(LIB).so: $(BUILD_DIR)
 	$(CC) -shared -o $(BUILD_DIR)/$(LIB).so $(SRC) $(LIB_LINK) $(FLAGS)
 
 clean:

@@ -10,7 +10,7 @@ Apr 10, 2019
 """
 
 import numpy as np
-from lib_wrapper import *
+from .lib_wrapper import *
 
 class fftlog(object):
 
@@ -240,7 +240,8 @@ class fftlog(object):
 
 class hankel(object):
 	def __init__(self, x, fx, nu, N_extrap_low=0, N_extrap_high=0, c_window_width=0.25, N_pad=0):
-		print('nu is required to be between (0.5-n) and 2.')
+		if nu<0.5 or nu>2:
+			raise ValueError('nu is required to be between (0.5-n) and 2.')
 		self.myfftlog = fftlog(x, np.sqrt(x)*fx, nu, N_extrap_low, N_extrap_high, c_window_width, N_pad)
 	
 	def hankel(self, n):
@@ -258,7 +259,8 @@ class hankel(object):
 
 def log_extrap(x, N_extrap_low, N_extrap_high):
 
-	low_x = high_x = []
+	low_x = []
+	high_x = []
 	if(N_extrap_low):
 		dlnx_low = np.log(x[1]/x[0])
 		low_x = x[0] * np.exp(dlnx_low * np.arange(-N_extrap_low, 0) )
